@@ -1,12 +1,12 @@
 # sift-android — STATUS
 
 **Updated:** 2026-05-20
-**Tier:** v1 scaffold (Phase 1 — first commit)
-**Velocity:** N/A (just started)
+**Tier:** v1 (Phase 2 — feed wired)
+**Velocity:** ~2 PRs / day (just started)
 
 ## Active focus
 
-v1 scaffold landed (Phase 1): Gradle setup, Kotlin/Compose module structure, ShareTarget activity stub, Newsprint/Late Edition theme tokens, AndroidManifest with App Links + ACTION_SEND filters. Application code lands in Phase 2 onward.
+Phase 2 underway. First wired screen: `FeedScreen` reads from the existing Next.js route `GET https://siftnews.kristenmartino.ai/api/news?category=top` and renders a `LazyColumn` of `ArticleCard` composables. Hilt + Retrofit + OkHttp + kotlinx.serialization graph live in `di/NetworkModule.kt`; data layer in `data/{api,model,repository}/`; UI in `ui/feed/`.
 
 Canonical decisions: [`sift/docs/ANDROID_APP_v1.md`](https://github.com/kristenmartino/sift/blob/main/docs/ANDROID_APP_v1.md) — KPIs in §2, monetization stance in §3, civic-literacy translation risk called out in §6.
 
@@ -20,9 +20,9 @@ Resolves with the pre-week-1 design sprint named in `ANDROID_APP_v1.md` §6. Unt
 
 ## Next 3
 
-1. **[committed]** Wire `FeedScreen` to `GET https://siftnews.kristenmartino.ai/api/news?category=:id`. Render a `LazyColumn` of `Article` cards. Tier `v1` · `effort-week`.
-2. **[committed]** Theme tokens — copy exact hex values from `sift/app/globals.css` for Newsprint + Late Edition (currently placeholder values in `ui/theme/Color.kt`). Verify against the web app on a side-by-side device. Tier `v1` · `effort-day`.
-3. **[sketch]** Design sprint output (wireframes for feed, article detail with primer, topic search, share target, settings) — pre-week-1 blocker per the plan. Not a code task but blocks every screen design. Tier `v1` · `effort-week`.
+1. **[committed]** Category tabs — `HorizontalPager` + `TabRow` across the 10 categories. `FeedViewModel.selectCategory(...)` already supports it; UI not yet wired. Tier `v1` · `effort-day`.
+2. **[committed]** `ArticleDetailScreen` — title, summary, source link to Custom Tabs. Civic-literacy primer + entity chips deferred to PR #3 of detail work (pending design sprint output). Tier `v1` · `effort-week`.
+3. **[sketch]** Design sprint output (wireframes for feed, article detail with primer, topic search, share target, settings) — pre-week-1 blocker per the plan. Not a code task but blocks every civic-literacy chrome decision in PR #3+. Tier `v1` · `effort-week`.
 
 ## Blocked-on
 
@@ -32,6 +32,7 @@ Resolves with the pre-week-1 design sprint named in `ANDROID_APP_v1.md` §6. Unt
 
 ## Recent decisions
 
+- **2026-05-20** — **First wired screen — FeedScreen → /api/news.** Article + NewsApiResponse data classes mirror sift/lib/types.ts (camelCase, kotlinx.serialization with `ignoreUnknownKeys = true` so server-side civic-literacy field additions don't break decoding). Single `FeedViewModel.state: StateFlow<FeedUiState>` (Loading / Content / Error) — no event channels, no nullable-with-booleans pattern. `ArticleRepository` is a thin Retrofit wrapper for now; Room cache layer slots in at week 6 without changing call sites.
 - **2026-05-20** — **First clean app launch on emulator.** Sentry SDK's `SentryInitProvider` ContentProvider runs before `Application.onCreate` and crashes (`IllegalArgumentException: DSN is required`) when no DSN is configured. Disabled auto-init via `<meta-data android:name="io.sentry.auto-init" android:value="false" />` in AndroidManifest. Re-enable / wire manual `Sentry.init()` in `SiftApplication.onCreate` once DSN is provisioned. Same category of scaffold bug as the build-error fixes below.
 - **2026-05-20** — **First clean `assembleDebug`.** Three scaffold fixes on top of the initial commit to get a green build:
   - Added `com.google.android.material:material:1.12.0` to `libs.versions.toml` + `app/build.gradle.kts`. `themes.xml` parents `Theme.Material3.DayNight.NoActionBar`, which lives in the Material Components library — `androidx.compose.material3` is Compose-only and doesn't ship XML themes.

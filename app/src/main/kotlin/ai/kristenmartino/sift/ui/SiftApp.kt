@@ -1,19 +1,15 @@
 package ai.kristenmartino.sift.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import ai.kristenmartino.sift.ui.feed.FeedScreen
 
 /**
- * Root composable. v1 scaffold renders a placeholder. Phase 2 wires the
- * Compose Navigation graph (Feed, Article detail, Search, Bookmarks, Settings).
+ * Root composable. v1 wires [FeedScreen] as the sole destination; navigation
+ * graph (article detail, search, bookmarks, settings) lands in follow-up PRs.
  *
  * Reference: docs/ANDROID_APP_v1.md §Architecture (kristenmartino/sift).
  */
@@ -23,18 +19,9 @@ fun SiftApp() {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
     ) {
-        Scaffold { padding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "Sift",
-                    style = MaterialTheme.typography.displayLarge,
-                )
-            }
-        }
+        FeedScreen(
+            // Article detail screen lands in the next PR. For now, taps are no-ops.
+            onArticleClick = { /* TODO(Phase 2): navigate to ArticleDetailScreen */ },
+        )
     }
 }

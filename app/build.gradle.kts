@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose) // collectAsStateWithLifecycle
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.browser) // Chrome Custom Tabs (article detail "Read full article")
     implementation(libs.material) // XML themes (Theme.Material3.*); Compose UI uses material3 below
 
     // Compose

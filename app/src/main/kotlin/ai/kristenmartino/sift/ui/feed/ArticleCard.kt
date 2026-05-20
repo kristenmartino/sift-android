@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,17 +29,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import ai.kristenmartino.sift.data.model.Article
-import ai.kristenmartino.sift.data.model.CategoryId
-import ai.kristenmartino.sift.ui.theme.CategoryBusiness
-import ai.kristenmartino.sift.ui.theme.CategoryEnergy
-import ai.kristenmartino.sift.ui.theme.CategoryEntertainment
-import ai.kristenmartino.sift.ui.theme.CategoryHealth
-import ai.kristenmartino.sift.ui.theme.CategoryPolitics
-import ai.kristenmartino.sift.ui.theme.CategoryScience
-import ai.kristenmartino.sift.ui.theme.CategorySports
-import ai.kristenmartino.sift.ui.theme.CategoryTech
-import ai.kristenmartino.sift.ui.theme.CategoryTop
-import ai.kristenmartino.sift.ui.theme.CategoryWorld
+import ai.kristenmartino.sift.ui.theme.accentColor
 
 /**
  * A single article card. Mirrors the web's text-first design:
@@ -141,19 +130,3 @@ fun ArticleCard(
     }
 }
 
-/**
- * Category → accent color. Stays close to the source of truth in
- * `ui/theme/Color.kt` (which mirrors web's CATEGORY_COLORS).
- */
-private fun CategoryId.accentColor(): Color = when (this) {
-    CategoryId.TOP -> CategoryTop
-    CategoryId.TECHNOLOGY -> CategoryTech
-    CategoryId.BUSINESS -> CategoryBusiness
-    CategoryId.SCIENCE -> CategoryScience
-    CategoryId.ENERGY -> CategoryEnergy
-    CategoryId.WORLD -> CategoryWorld
-    CategoryId.HEALTH -> CategoryHealth
-    CategoryId.POLITICS -> CategoryPolitics
-    CategoryId.SPORTS -> CategorySports
-    CategoryId.ENTERTAINMENT -> CategoryEntertainment
-}

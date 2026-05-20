@@ -16,6 +16,7 @@ import javax.inject.Singleton
 @Singleton
 class ArticleRepository @Inject constructor(
     private val api: SiftApi,
+    private val store: ArticleStore,
 ) {
     /**
      * Fetch articles for [category].
@@ -24,6 +25,13 @@ class ArticleRepository @Inject constructor(
      * unknown keys (see NetworkModule), so a backend that adds fields to
      * `Article` won't break us — we just won't render them until we know
      * to look for them.
+     *
+     * Successful fetches populate [ArticleStore] so the detail screen can
+     * resolve `article/{id}` without a second request.
      */
-    suspend fun feed(category: CategoryId): List<Article> = api.getFeed(category.wire()).articles
+    suspend fun feed(category: CategoryId): List<Article> {
+        val articles = api.getFeed(category.wire()).articles
+        store.put(articles)
+        return articles
+    }
 }

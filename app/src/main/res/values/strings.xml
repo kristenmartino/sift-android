@@ -2,4 +2,10 @@
 <resources>
     <string name="app_name">Sift</string>
     <string name="share_to_sift">Sift this URL</string>
+
+    <!-- Article detail screen -->
+    <string name="back">Back</string>
+    <string name="read_full_article">Read full article</string>
+    <string name="article_unavailable">This article isn\'t available right now.</string>
+    <string name="article_unavailable_hint">Open the feed and tap it again.</string>
 </resources>

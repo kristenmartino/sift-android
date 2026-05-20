@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light (Newsprint). Compose owns the runtime palette; this is splash/system surface only. -->
+    <style name="Theme.Sift" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/newsprint_paper</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- Translucent variant for share-target activity overlay. -->
+    <style name="Theme.Sift.Translucent" parent="Theme.Sift">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

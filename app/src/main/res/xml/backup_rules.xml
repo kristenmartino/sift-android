@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Auto-backup rules for Android < 12 -->
+<full-backup-content>
+    <!-- Exclude bookmarks DB — sync to Clerk + Postgres, no local restore needed -->
+    <exclude domain="database" path="sift.db" />
+</full-backup-content>

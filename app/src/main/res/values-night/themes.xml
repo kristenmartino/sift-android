@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark (Late Edition). Mirrors values/themes.xml. -->
+    <style name="Theme.Sift" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/late_edition_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.Sift.Translucent" parent="Theme.Sift">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

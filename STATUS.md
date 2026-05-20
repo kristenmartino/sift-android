@@ -1,12 +1,14 @@
 # sift-android — STATUS
 
 **Updated:** 2026-05-20
-**Tier:** v1 (Phase 2 — feed wired)
-**Velocity:** ~2 PRs / day (just started)
+**Tier:** v1 (Phase 2 — navigation wired)
+**Velocity:** ~2 PRs / day
 
 ## Active focus
 
-Phase 2 underway. **FeedHostScreen** with 10-category `ScrollableTabRow` + `HorizontalPager` over `FeedScreen`. Each category's state is cached in `FeedViewModel.states: Map<CategoryId, FeedUiState>`, so swiping between already-loaded categories is instant. Hilt + Retrofit + OkHttp + kotlinx.serialization graph live in `di/NetworkModule.kt`; data layer in `data/{api,model,repository}/`; UI in `ui/feed/`.
+Phase 2 underway. **`SiftNavHost`** now wires the two destinations the app has: `feed` (10-category tabs + pager) and `article/{articleId}` (detail screen). Taps on a `FeedHostScreen` card navigate to detail; the detail screen reads the article out of `ArticleStore` (`@Singleton` in `data/repository/`, populated by `ArticleRepository.feed`) — keeps the two ViewModels decoupled and gives Room a drop-in seat at week 6. Source-link CTA opens Chrome Custom Tabs with Sift's Newsprint / Late Edition palette on the toolbar.
+
+Civic-literacy chrome (primer panel + entity chips) on the detail screen is deferred to a follow-up PR pending the design sprint. Hilt + Retrofit + OkHttp + kotlinx.serialization graph in `di/NetworkModule.kt`; data layer in `data/{api,model,repository}/`; UI in `ui/{feed,article}/`.
 
 Canonical decisions: [`sift/docs/ANDROID_APP_v1.md`](https://github.com/kristenmartino/sift/blob/main/docs/ANDROID_APP_v1.md) — KPIs in §2, monetization stance in §3, civic-literacy translation risk called out in §6.
 
@@ -20,9 +22,9 @@ Resolves with the pre-week-1 design sprint named in `ANDROID_APP_v1.md` §6. Unt
 
 ## Next 3
 
-1. **[committed]** `ArticleDetailScreen` — title, summary, source link to Custom Tabs. Civic-literacy primer + entity chips deferred to the chrome PR (pending design sprint). Tier `v1` · `effort-week`.
-2. **[committed]** Compose Navigation — `NavHost` wiring `feed` ↔ `article/{id}`. Currently `onArticleClick` is a no-op; this PR makes taps navigate. Tier `v1` · `effort-day`.
-3. **[sketch]** Design sprint output (wireframes for feed, article detail with primer, topic search, share target, settings) — pre-week-1 blocker per the plan. Not a code task but blocks every civic-literacy chrome decision in the chrome PR. Tier `v1` · `effort-week`.
+1. **[sketch]** Design sprint output (wireframes for feed, article detail with primer, topic search, share target, settings) — pre-week-1 blocker per the plan. Running in parallel with code work; civic-literacy chrome PR blocks on this. Tier `v1` · `effort-week`.
+2. **[committed]** Civic-literacy chrome on detail screen — `whyItMatters` primer panel + entity chips. Blocked on the design sprint; the data is already on the wire (`Article.whyItMatters: String?`). Tier `v1` · `effort-week`.
+3. **[committed]** Topic search screen — third route in `SiftNavHost` (`search`). Reuse `ArticleCard`; hit `/api/news?q=`. Tier `v1` · `effort-day`.
 
 ## Blocked-on
 
@@ -32,6 +34,7 @@ Resolves with the pre-week-1 design sprint named in `ANDROID_APP_v1.md` §6. Unt
 
 ## Recent decisions
 
+- **2026-05-20** — **ArticleDetailScreen + NavHost + Custom Tabs.** First navigable surface beyond the feed. `SiftNavHost` introduces routes `feed` and `article/{articleId}`. `ArticleStore` (new `@Singleton` in `data/repository/`) is the in-memory bridge between fetch (populated by `ArticleRepository.feed`) and detail (read by `ArticleDetailViewModel`); swap to Room at week 6 without touching call sites. Process-death fallback: in-memory store returns `null` after kill → detail VM emits `Missing` state with explanatory copy + back button (SavedStateHandle restoration is a v1.1 polish item). Custom Tabs over `Intent.ACTION_VIEW` so source links keep the Sift palette on the toolbar — `NewsprintPaper` light / `LateEditionBg` dark. Civic-literacy chrome (primer + entity chips) deferred to the next PR pending the design sprint. `accentColor()` extracted from `ArticleCard`'s private helper to `ui/theme/CategoryAccent.kt` so detail screen + future chips can share it.
 - **2026-05-20** — **Category tabs + HorizontalPager.** `FeedViewModel` reshaped from one-category-at-a-time to `Map<CategoryId, FeedUiState>` so already-loaded pages render instantly on revisit. `FeedScreen` becomes stateless (parent passes the relevant state + callbacks); `FeedHostScreen` owns the pager + tabs + ViewModel. Loading strategy: eager-load `TOP` on init, others on first selection via `LaunchedEffect(currentPage)`. Error states require explicit Retry (don't auto-refetch on revisit) so a transient failure can be inspected.
 - **2026-05-20** — **Two post-merge build fixes on top of PR #2 (feed wired).** Pulled main, build broke; both root-caused and landed direct-to-main:
   - `data/api/SiftApi.kt:13` KDoc contained the literal `` `/v1/*` ``. Kotlin block comments nest per spec, so `/*` opened a nested level that the `*/` on line 20 closed prematurely, leaving the outer KDoc unterminated → "Unclosed comment" at EOF → six cascading misleading Hilt KSP `error.NonExistentClass` failures. Rewrote to `` `/v1/...` `` (commit `c09ba96`). Lesson: avoid `/*` or `*/` sequences inside KDoc backticks.

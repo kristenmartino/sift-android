@@ -23,6 +23,12 @@
         android:theme="@style/Theme.Sift"
         tools:targetApi="35">
 
+        <!-- Sentry auto-init disabled. The SDK's SentryInitProvider runs before
+             Application.onCreate and crashes if no DSN is present. We init manually
+             from SiftApplication.onCreate once DSN + PostHog keys are wired (see
+             follow-up PR per app/build.gradle.kts:108-110 comment). -->
+        <meta-data android:name="io.sentry.auto-init" android:value="false" />
+
         <!-- Main launcher. Single-Activity architecture; navigation handled via
              Compose Navigation inside this activity. -->
         <activity

@@ -32,6 +32,7 @@ Resolves with the pre-week-1 design sprint named in `ANDROID_APP_v1.md` §6. Unt
 
 ## Recent decisions
 
+- **2026-05-20** — **First clean app launch on emulator.** Sentry SDK's `SentryInitProvider` ContentProvider runs before `Application.onCreate` and crashes (`IllegalArgumentException: DSN is required`) when no DSN is configured. Disabled auto-init via `<meta-data android:name="io.sentry.auto-init" android:value="false" />` in AndroidManifest. Re-enable / wire manual `Sentry.init()` in `SiftApplication.onCreate` once DSN is provisioned. Same category of scaffold bug as the build-error fixes below.
 - **2026-05-20** — **First clean `assembleDebug`.** Three scaffold fixes on top of the initial commit to get a green build:
   - Added `com.google.android.material:material:1.12.0` to `libs.versions.toml` + `app/build.gradle.kts`. `themes.xml` parents `Theme.Material3.DayNight.NoActionBar`, which lives in the Material Components library — `androidx.compose.material3` is Compose-only and doesn't ship XML themes.
   - Flipped `ksp.useKSP2=true` → `false` in `gradle.properties`. Hilt 2.52's bytecode transform that auto-fills `@AndroidEntryPoint`/`@HiltAndroidApp` parent classes runs after KSP2 reads them, so KSP2 sees empty annotations and fails. Revisit when Hilt catches up.

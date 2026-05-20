@@ -10,7 +10,7 @@ import retrofit2.http.Query
  * Reads currently target the existing Next.js routes at
  * https://siftnews.kristenmartino.ai per [DECISIONS.md#D33](
  * https://github.com/kristenmartino/sift/blob/main/docs/DECISIONS.md
- * ) — we don't proliferate a canonical `/v1/*` API until a third client
+ * ) — we don't proliferate a canonical `/v1/...` API until a third client
  * validates the surface.
  *
  * The two genuinely net-new endpoints we'll add to `sift-api` (per

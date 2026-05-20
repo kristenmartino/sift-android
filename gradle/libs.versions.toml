@@ -48,6 +48,7 @@ posthog    = "3.7.4"
 
 # Core
 androidxCore = "1.15.0"
+material     = "1.12.0"            # com.google.android.material — XML themes (Theme.Material3.*)
 
 # Testing
 junit            = "4.13.2"
@@ -66,6 +67,7 @@ androidx-core-ktx                 = { group = "androidx.core", name = "core-ktx"
 androidx-lifecycle-runtime-ktx    = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntime" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleVmCompose" }
 androidx-activity-compose         = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+material                          = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 # Compose
 androidx-compose-bom              = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }

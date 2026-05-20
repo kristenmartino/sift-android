@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.material) // XML themes (Theme.Material3.*); Compose UI uses material3 below
 
     // Compose
     implementation(libs.androidx.compose.ui)

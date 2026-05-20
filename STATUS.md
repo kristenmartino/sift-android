@@ -16,22 +16,24 @@ Canonical decisions: [`sift/docs/ANDROID_APP_v1.md`](https://github.com/kristenm
 
 Biggest design risk from the iOS plan critique, carried forward. The primer panel is ~60 words of prose + 0–4 term cards; the article body has 6+ entity-link chips inline. On a 6.1" portrait screen with thumbs-on-bottom ergonomics, the wall-of-text risk is real.
 
-Resolves with the pre-week-1 design sprint named in `ANDROID_APP_v1.md` §6. Until that lands, every screen design decision in Phase 2 is provisional.
+**Status: provisionally resolved.** Design sprint v0 landed in [`sift/docs/DESIGN_SPRINT.md`](https://github.com/kristenmartino/sift/blob/main/docs/DESIGN_SPRINT.md) — answer is "progressive disclosure with editorial defaults": above the fold = title + source + AI summary + tap-to-expand affordance; primer collapsed by default; term tap → modal bottom sheet → dossier in Custom Tabs. **Final validation at closed beta** (week 10–11 per `ANDROID_APP_v1.md`) — recruit 5 readers from the web user pool, watch them use the article detail screen specifically.
 
 ## Next 3
 
-1. **[committed]** `ArticleDetailScreen` — title, summary, source link to Custom Tabs. Civic-literacy primer + entity chips deferred to the chrome PR (pending design sprint). Tier `v1` · `effort-week`.
+1. **[committed]** `ArticleDetailScreen` — title, summary, source link to Custom Tabs (Chrome Custom Tabs with reader-mode hint). Implements §Screen 1 IA from the design sprint. Civic-literacy chrome (primer panel, term chips, entity chips, cross-spectrum panel) deferred to the next PR after this lands. Tier `v1` · `effort-week`.
 2. **[committed]** Compose Navigation — `NavHost` wiring `feed` ↔ `article/{id}`. Currently `onArticleClick` is a no-op; this PR makes taps navigate. Tier `v1` · `effort-day`.
-3. **[sketch]** Design sprint output (wireframes for feed, article detail with primer, topic search, share target, settings) — pre-week-1 blocker per the plan. Not a code task but blocks every civic-literacy chrome decision in the chrome PR. Tier `v1` · `effort-week`.
+3. **[committed]** Civic-literacy chrome — `PrimerPanel` (expandable), `TermChip` + `EntityChip` + `OutletBadge` + bottom-sheet pattern, `CrossSpectrumPanel`. Implements the progressive-disclosure pattern from design sprint §Screen 1. Component inventory in sprint doc §Component inventory. Tier `v1` · `effort-week`.
 
 ## Blocked-on
 
-- **Design sprint** for civic-literacy mobile translation (named in `ANDROID_APP_v1.md` §6 as "non-negotiable pre-week-1")
 - **Google Play Developer account** ($25 one-time, instant) — needed by week 9 for closed beta. Not blocking dev work.
 - **FCM project setup** + `google-services.json` — needed by week 8 for push. Not blocking earlier weeks.
 
+*(Design sprint resolved 2026-05-20 — see [`sift/docs/DESIGN_SPRINT.md`](https://github.com/kristenmartino/sift/blob/main/docs/DESIGN_SPRINT.md).)*
+
 ## Recent decisions
 
+- **2026-05-20** — **Design sprint v0 shipped.** [`sift/docs/DESIGN_SPRINT.md`](https://github.com/kristenmartino/sift/blob/main/docs/DESIGN_SPRINT.md). Six screens (article detail, feed, share target, topic search, bookmarks, settings) with IA + ASCII wireframes + interaction patterns + a 10-item component inventory for Phase 2 extraction. The civic-literacy translation pattern is **progressive disclosure with editorial defaults**: default state is scannable; primer panel + cross-spectrum collapsed by default; term/entity chip tap → modal bottom sheet → "Open full dossier" → Custom Tabs. 11 open questions documented with provisional sprint votes (none block Phase 2 code). Validates at closed beta (week 10–11) with 5 readers from the web user pool.
 - **2026-05-20** — **Category tabs + HorizontalPager.** `FeedViewModel` reshaped from one-category-at-a-time to `Map<CategoryId, FeedUiState>` so already-loaded pages render instantly on revisit. `FeedScreen` becomes stateless (parent passes the relevant state + callbacks); `FeedHostScreen` owns the pager + tabs + ViewModel. Loading strategy: eager-load `TOP` on init, others on first selection via `LaunchedEffect(currentPage)`. Error states require explicit Retry (don't auto-refetch on revisit) so a transient failure can be inspected.
 - **2026-05-20** — **Two post-merge build fixes on top of PR #2 (feed wired).** Pulled main, build broke; both root-caused and landed direct-to-main:
   - `data/api/SiftApi.kt:13` KDoc contained the literal `` `/v1/*` ``. Kotlin block comments nest per spec, so `/*` opened a nested level that the `*/` on line 20 closed prematurely, leaving the outer KDoc unterminated → "Unclosed comment" at EOF → six cascading misleading Hilt KSP `error.NonExistentClass` failures. Rewrote to `` `/v1/...` `` (commit `c09ba96`). Lesson: avoid `/*` or `*/` sequences inside KDoc backticks.

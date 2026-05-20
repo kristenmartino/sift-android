@@ -6,7 +6,7 @@
 
 ## Active focus
 
-Phase 2 underway. First wired screen: `FeedScreen` reads from the existing Next.js route `GET https://siftnews.kristenmartino.ai/api/news?category=top` and renders a `LazyColumn` of `ArticleCard` composables. Hilt + Retrofit + OkHttp + kotlinx.serialization graph live in `di/NetworkModule.kt`; data layer in `data/{api,model,repository}/`; UI in `ui/feed/`.
+Phase 2 underway. **FeedHostScreen** with 10-category `ScrollableTabRow` + `HorizontalPager` over `FeedScreen`. Each category's state is cached in `FeedViewModel.states: Map<CategoryId, FeedUiState>`, so swiping between already-loaded categories is instant. Hilt + Retrofit + OkHttp + kotlinx.serialization graph live in `di/NetworkModule.kt`; data layer in `data/{api,model,repository}/`; UI in `ui/feed/`.
 
 Canonical decisions: [`sift/docs/ANDROID_APP_v1.md`](https://github.com/kristenmartino/sift/blob/main/docs/ANDROID_APP_v1.md) — KPIs in §2, monetization stance in §3, civic-literacy translation risk called out in §6.
 
@@ -20,9 +20,9 @@ Resolves with the pre-week-1 design sprint named in `ANDROID_APP_v1.md` §6. Unt
 
 ## Next 3
 
-1. **[committed]** Category tabs — `HorizontalPager` + `TabRow` across the 10 categories. `FeedViewModel.selectCategory(...)` already supports it; UI not yet wired. Tier `v1` · `effort-day`.
-2. **[committed]** `ArticleDetailScreen` — title, summary, source link to Custom Tabs. Civic-literacy primer + entity chips deferred to PR #3 of detail work (pending design sprint output). Tier `v1` · `effort-week`.
-3. **[sketch]** Design sprint output (wireframes for feed, article detail with primer, topic search, share target, settings) — pre-week-1 blocker per the plan. Not a code task but blocks every civic-literacy chrome decision in PR #3+. Tier `v1` · `effort-week`.
+1. **[committed]** `ArticleDetailScreen` — title, summary, source link to Custom Tabs. Civic-literacy primer + entity chips deferred to the chrome PR (pending design sprint). Tier `v1` · `effort-week`.
+2. **[committed]** Compose Navigation — `NavHost` wiring `feed` ↔ `article/{id}`. Currently `onArticleClick` is a no-op; this PR makes taps navigate. Tier `v1` · `effort-day`.
+3. **[sketch]** Design sprint output (wireframes for feed, article detail with primer, topic search, share target, settings) — pre-week-1 blocker per the plan. Not a code task but blocks every civic-literacy chrome decision in the chrome PR. Tier `v1` · `effort-week`.
 
 ## Blocked-on
 
@@ -32,6 +32,7 @@ Resolves with the pre-week-1 design sprint named in `ANDROID_APP_v1.md` §6. Unt
 
 ## Recent decisions
 
+- **2026-05-20** — **Category tabs + HorizontalPager.** `FeedViewModel` reshaped from one-category-at-a-time to `Map<CategoryId, FeedUiState>` so already-loaded pages render instantly on revisit. `FeedScreen` becomes stateless (parent passes the relevant state + callbacks); `FeedHostScreen` owns the pager + tabs + ViewModel. Loading strategy: eager-load `TOP` on init, others on first selection via `LaunchedEffect(currentPage)`. Error states require explicit Retry (don't auto-refetch on revisit) so a transient failure can be inspected.
 - **2026-05-20** — **Two post-merge build fixes on top of PR #2 (feed wired).** Pulled main, build broke; both root-caused and landed direct-to-main:
   - `data/api/SiftApi.kt:13` KDoc contained the literal `` `/v1/*` ``. Kotlin block comments nest per spec, so `/*` opened a nested level that the `*/` on line 20 closed prematurely, leaving the outer KDoc unterminated → "Unclosed comment" at EOF → six cascading misleading Hilt KSP `error.NonExistentClass` failures. Rewrote to `` `/v1/...` `` (commit `c09ba96`). Lesson: avoid `/*` or `*/` sequences inside KDoc backticks.
   - `gradle/libs.versions.toml` had `retrofit-kotlinx-serialization` aliased to `com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0`, but JakeWharton's 1.0.0 release re-packaged everything under `com.jakewharton.retrofit2.converter.kotlinx.serialization` — while `di/NetworkModule.kt` imports `retrofit2.converter.kotlinx.serialization.asConverterFactory` (Square's package). Square took over the converter; it now ships as `com.squareup.retrofit2:converter-kotlinx-serialization` versioned with Retrofit itself. Swapped artifact, dropped the now-unused `retrofitSerialization` version pin (commit `b2c2c04`).

@@ -2,6 +2,7 @@ package ai.kristenmartino.sift.ui.feed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ai.kristenmartino.sift.data.model.Category
 import ai.kristenmartino.sift.data.model.CategoryId
 import ai.kristenmartino.sift.data.repository.ArticleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,60 +14,75 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Owns the feed state for one category at a time. v1 keeps category in
- * internal state (default = TOP); a Tabs / HorizontalPager UI in a later PR
- * will drive `selectCategory(...)` from outside.
+ * Owns feed state for all 10 categories.
  *
- * Pattern: every screen here exposes a single `StateFlow<UiState>` and a
- * handful of intent methods. No event channels, no shared mutable state
- * across screens. Simpler to test, simpler to reason about lifecycle.
+ * Why per-category state (vs one-at-a-time): the [FeedHostScreen] uses a
+ * `HorizontalPager` with `beyondBoundsPageCount = 1`, so adjacent pages
+ * compose. With one-at-a-time state, swiping triggers a re-fetch every time;
+ * with per-category state, already-loaded pages render instantly.
+ *
+ * Loading strategy: eager-load `TOP` on init (the default landing tab);
+ * other categories load on demand when [ensureLoaded] is called from the
+ * pager's page-change effect. Subsequent visits within session use the
+ * cached state until [refresh] is called.
  */
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     private val articleRepository: ArticleRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<FeedUiState>(FeedUiState.Loading(CategoryId.TOP))
-    val state: StateFlow<FeedUiState> = _state.asStateFlow()
+    private val _states: MutableStateFlow<Map<CategoryId, FeedUiState>> = MutableStateFlow(
+        Category.ALL.associate { it.id to FeedUiState.Loading(it.id) },
+    )
+    val states: StateFlow<Map<CategoryId, FeedUiState>> = _states.asStateFlow()
+
+    /**
+     * Categories currently being fetched. Prevents double-fetch from
+     * concurrent `ensureLoaded` calls (pager + visibility effects can both
+     * fire on the same category before the first request resolves).
+     */
+    private val inFlight: MutableSet<CategoryId> = mutableSetOf()
 
     init {
-        refresh()
+        loadFeed(CategoryId.TOP)
     }
 
-    fun selectCategory(category: CategoryId) {
-        if (_state.value.category == category) return
-        _state.value = FeedUiState.Loading(category)
+    /**
+     * Called by the pager when a page becomes selected. Idempotent — only
+     * fetches if the category hasn't been loaded yet (or is in Error state,
+     * in which case [refresh] handles re-fetch).
+     */
+    fun ensureLoaded(category: CategoryId) {
+        val current = _states.value[category]
+        if (current is FeedUiState.Content) return
+        if (current is FeedUiState.Error) return // user must tap Retry
+        if (category in inFlight) return
         loadFeed(category)
     }
 
-    fun refresh() {
-        val current = _state.value
-        val category = current.category
-        _state.update {
-            when (current) {
-                is FeedUiState.Content -> current.copy(refreshing = true)
-                else -> FeedUiState.Loading(category)
-            }
+    fun refresh(category: CategoryId) {
+        val current = _states.value[category]
+        val next = when (current) {
+            is FeedUiState.Content -> current.copy(refreshing = true)
+            else -> FeedUiState.Loading(category)
         }
+        _states.update { it + (category to next) }
         loadFeed(category)
     }
 
     private fun loadFeed(category: CategoryId) {
+        if (!inFlight.add(category)) return
         viewModelScope.launch {
-            runCatching { articleRepository.feed(category) }
-                .onSuccess { articles ->
-                    _state.value = FeedUiState.Content(
-                        category = category,
-                        articles = articles,
-                        refreshing = false,
-                    )
+            try {
+                val articles = articleRepository.feed(category)
+                _states.update { it + (category to FeedUiState.Content(category, articles)) }
+            } catch (throwable: Throwable) {
+                _states.update {
+                    it + (category to FeedUiState.Error(category, throwable.userFacingMessage()))
                 }
-                .onFailure { throwable ->
-                    _state.value = FeedUiState.Error(
-                        category = category,
-                        message = throwable.userFacingMessage(),
-                    )
-                }
+            } finally {
+                inFlight.remove(category)
+            }
         }
     }
 }
@@ -76,10 +92,10 @@ class FeedViewModel @Inject constructor(
  * UI. Don't surface stack traces or raw exception messages — they leak
  * internal detail and confuse non-engineers.
  */
-private fun Throwable.userFacingMessage(): String = when {
-    this is java.net.UnknownHostException ->
+private fun Throwable.userFacingMessage(): String = when (this) {
+    is java.net.UnknownHostException ->
         "Couldn't reach Sift. Check your connection and try again."
-    this is java.net.SocketTimeoutException ->
+    is java.net.SocketTimeoutException ->
         "The request timed out. Try again."
     else -> "Something went wrong loading the feed. Try again."
 }

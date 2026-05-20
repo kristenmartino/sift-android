@@ -13,70 +13,42 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ai.kristenmartino.sift.data.model.Category
+import ai.kristenmartino.sift.data.model.Article
 
 /**
- * The feed surface. v1: single category (TOP), no tabs. Category switching
- * lands in the next PR alongside HorizontalPager + TabRow.
+ * Renders one category's feed.
  *
- * Three render states:
+ * **Stateless** — parent ([FeedHostScreen]) owns the ViewModel and passes
+ * the relevant [FeedUiState] + callbacks. This makes the screen trivially
+ * previewable and lets the pager host multiple instances concurrently.
+ *
+ * Three render branches:
  *   Loading  → centered spinner
  *   Error    → message + Retry button
  *   Content  → LazyColumn of [ArticleCard]
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
-    onArticleClick: (articleId: String) -> Unit = {},
-    viewModel: FeedViewModel = hiltViewModel(),
+    state: FeedUiState,
+    onRetry: () -> Unit,
+    onArticleClick: (articleId: String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    val categoryLabel = Category.ALL.firstOrNull { it.id == state.category }?.label
-        ?: state.category.wire()
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = categoryLabel,
-                        style = MaterialTheme.typography.headlineSmall,
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
+    Box(modifier = modifier.fillMaxSize()) {
+        when (state) {
+            is FeedUiState.Loading -> LoadingState()
+            is FeedUiState.Error -> ErrorState(message = state.message, onRetry = onRetry)
+            is FeedUiState.Content -> ContentState(
+                articles = state.articles,
+                onArticleClick = onArticleClick,
             )
-        },
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-        ) {
-            when (val s = state) {
-                is FeedUiState.Loading -> LoadingState()
-                is FeedUiState.Error -> ErrorState(message = s.message, onRetry = viewModel::refresh)
-                is FeedUiState.Content -> ContentState(
-                    articles = s.articles,
-                    onArticleClick = onArticleClick,
-                )
-            }
         }
     }
 }
@@ -112,7 +84,7 @@ private fun ErrorState(message: String, onRetry: () -> Unit) {
 
 @Composable
 private fun ContentState(
-    articles: List<ai.kristenmartino.sift.data.model.Article>,
+    articles: List<Article>,
     onArticleClick: (String) -> Unit,
 ) {
     if (articles.isEmpty()) {

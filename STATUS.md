@@ -1,10 +1,24 @@
 # sift-android — STATUS
 
-**Updated:** 2026-05-20
-**Tier:** v1 (Phase 2 — navigation wired)
-**Velocity:** ~2 PRs / day
+> ## ⏸ PAUSED — 2026-07-27
+>
+> **Android v1 is paused for 90 days.** Decision D46, recorded in [`sift/docs/DECISIONS.md`](https://github.com/kristenmartino/sift/blob/main/docs/DECISIONS.md); full reasoning in [`sift/docs/LAUNCH_DECISION_MEMO.md`](https://github.com/kristenmartino/sift/blob/main/docs/LAUNCH_DECISION_MEMO.md).
+>
+> **Why:** twelve weeks of build against zero validated demand was the largest resource question on the board. Sift is launched and unadopted — effectively zero users, $0 revenue — and the 90-day plan spends its hours finding out whether anyone wants the product that already exists, not adding a second client for it.
+>
+> **This work is preserved, not abandoned.** Phase 2 is complete and sound: `SiftNavHost`, the feed with category tabs + pager, article detail via `ArticleStore`, Chrome Custom Tabs with the Sift palette. Nothing below is being reverted. The everything-below section describes the state at pause, not work in progress.
+>
+> **Un-pause condition:** the Q1 wedge-user question closes with a wedge whose behavior is mobile-shaped, *and* the week-one evidence test in the launch memo draws real replies. Absent both, this stays paused. Do not resume on enthusiasm.
+>
+> **Nothing here is blocking:** the design sprint, the Google Play account ($25), and FCM setup are all deferred with it.
+
+**Updated:** 2026-07-27 *(paused; content below last updated 2026-05-20)*
+**Tier:** v1 (Phase 2 — navigation wired) — **frozen at pause**
+**Velocity:** Paused. Was ~2 PRs / day through 2026-05-20.
 
 ## Active focus
+
+**None — paused.** State at pause, for whoever picks this up:
 
 Phase 2 underway. **`SiftNavHost`** now wires the two destinations the app has: `feed` (10-category tabs + pager) and `article/{articleId}` (detail screen). Taps on a `FeedHostScreen` card navigate to detail; the detail screen reads the article out of `ArticleStore` (`@Singleton` in `data/repository/`, populated by `ArticleRepository.feed`) — keeps the two ViewModels decoupled and gives Room a drop-in seat at week 6. Source-link CTA opens Chrome Custom Tabs with Sift's Newsprint / Late Edition palette on the toolbar.
 

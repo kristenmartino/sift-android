@@ -10,7 +10,7 @@
 >
 > **Un-pause condition:** the Q1 wedge-user question closes with a wedge whose behavior is mobile-shaped, *and* the week-one evidence test in the launch memo draws real replies. Absent both, this stays paused. Do not resume on enthusiasm.
 >
-> **Nothing here is blocking:** the design sprint, the Google Play account ($25), and FCM setup are all deferred with it.
+> **Nothing here is blocking:** the Google Play account ($25) and FCM setup are deferred with the pause. The design sprint is **not** outstanding — it was resolved 2026-05-20 (see Recent decisions); an earlier version of this banner listed it as "deferred", which wrongly implied it was still open.
 
 **Updated:** 2026-07-27 *(paused; content below last updated 2026-05-20)*
 **Tier:** v1 (Phase 2 — navigation wired) — **frozen at pause**
@@ -22,32 +22,39 @@
 
 Phase 2 underway. **`SiftNavHost`** now wires the two destinations the app has: `feed` (10-category tabs + pager) and `article/{articleId}` (detail screen). Taps on a `FeedHostScreen` card navigate to detail; the detail screen reads the article out of `ArticleStore` (`@Singleton` in `data/repository/`, populated by `ArticleRepository.feed`) — keeps the two ViewModels decoupled and gives Room a drop-in seat at week 6. Source-link CTA opens Chrome Custom Tabs with Sift's Newsprint / Late Edition palette on the toolbar.
 
-Civic-literacy chrome (primer panel + entity chips) on the detail screen is deferred to a follow-up PR pending the design sprint. Hilt + Retrofit + OkHttp + kotlinx.serialization graph in `di/NetworkModule.kt`; data layer in `data/{api,model,repository}/`; UI in `ui/{feed,article}/`.
+Civic-literacy chrome (primer panel + entity chips) on the detail screen was deferred to a follow-up PR pending the design sprint — that sprint resolved 2026-05-20, so the chrome PR was unblocked before the pause, not after it. Hilt + Retrofit + OkHttp + kotlinx.serialization graph in `di/NetworkModule.kt`; data layer in `data/{api,model,repository}/`; UI in `ui/{feed,article}/`.
 
 Canonical decisions: [`sift/docs/ANDROID_APP_v1.md`](https://github.com/kristenmartino/sift/blob/main/docs/ANDROID_APP_v1.md) — KPIs in §2, monetization stance in §3, civic-literacy translation risk called out in §6.
 
 ## Open strategic question
 
-**Will the civic-literacy primer + entity chips actually work on a phone screen?**
+**~~Will the civic-literacy primer + entity chips actually work on a phone screen?~~ — answered 2026-05-20.**
 
-Biggest design risk from the iOS plan critique, carried forward. The primer panel is ~60 words of prose + 0–4 term cards; the article body has 6+ entity-link chips inline. On a 6.1" portrait screen with thumbs-on-bottom ergonomics, the wall-of-text risk is real.
+Biggest design risk from the iOS plan critique, carried forward. The primer panel is ~60 words of prose + 0–4 term cards; the article body has 6+ entity-link chips inline. On a 6.1" portrait screen with thumbs-on-bottom ergonomics, the wall-of-text risk was real.
 
-Resolves with the pre-week-1 design sprint named in `ANDROID_APP_v1.md` §6. Until that lands, every screen design decision in Phase 2 is provisional.
+**Answer: progressive disclosure with editorial defaults**, from the design sprint at [`sift`#107](https://github.com/kristenmartino/sift/pull/107). Screen designs in Phase 2 are no longer provisional. Final validation was to come from closed beta with 5 web users — that validation has **not** happened and is deferred with the D46 pause, so treat the answer as sound in principle and untested with users.
+
+*This section said "Resolves with the pre-week-1 design sprint… until that lands, every screen design decision in Phase 2 is provisional" for ten weeks after the sprint landed. See Recent decisions.*
 
 ## Next 3
 
-1. **[sketch]** Design sprint output (wireframes for feed, article detail with primer, topic search, share target, settings) — pre-week-1 blocker per the plan. Running in parallel with code work; civic-literacy chrome PR blocks on this. Tier `v1` · `effort-week`.
-2. **[committed]** Civic-literacy chrome on detail screen — `whyItMatters` primer panel + entity chips. Blocked on the design sprint; the data is already on the wire (`Article.whyItMatters: String?`). Tier `v1` · `effort-week`.
+1. ~~**[sketch]** Design sprint output (wireframes for feed, article detail with primer, topic search, share target, settings)~~ — **done 2026-05-20** (`sift`#107). Was never removed from this list; see Recent decisions.
+2. **[committed]** Civic-literacy chrome on detail screen — `whyItMatters` primer panel + entity chips. ~~Blocked on the design sprint~~ — unblocked 2026-05-20; the data is already on the wire (`Article.whyItMatters: String?`). This was the next item when work stopped. Tier `v1` · `effort-week`.
 3. **[committed]** Topic search screen — third route in `SiftNavHost` (`search`). Reuse `ArticleCard`; hit `/api/news?q=`. Tier `v1` · `effort-day`.
 
 ## Blocked-on
 
-- **Design sprint** for civic-literacy mobile translation (named in `ANDROID_APP_v1.md` §6 as "non-negotiable pre-week-1")
+*(All deferred with the pause. None was ever the reason work stopped.)*
+
 - **Google Play Developer account** ($25 one-time, instant) — needed by week 9 for closed beta. Not blocking dev work.
 - **FCM project setup** + `google-services.json` — needed by week 8 for push. Not blocking earlier weeks.
 
+~~**Design sprint** for civic-literacy mobile translation~~ — **resolved 2026-05-20, see Recent decisions.** This line said "non-negotiable pre-week-1" and sat here for ten weeks after the question had actually been answered, because the PR recording the answer ([#4](https://github.com/kristenmartino/sift-android/pull/4)) was never merged. Do **not** re-run this sprint on un-pause.
+
 ## Recent decisions
 
+- **2026-05-20** — **Design sprint: resolved.** Answer: **progressive disclosure with editorial defaults.** Shipped at [`sift`#107](https://github.com/kristenmartino/sift/pull/107); final validation was to come from closed beta with 5 web users. This addressed the open question below — whether the civic-literacy primer + entity chips work on a 6.1" portrait screen — which `ANDROID_APP_v1.md` §6 called a "non-negotiable pre-week-1" blocker.
+  *Recorded here on 2026-07-28.* The PR that would have logged it ([#4](https://github.com/kristenmartino/sift-android/pull/4)) was opened 2026-05-20 and never merged, so `STATUS.md` carried the sprint as a live blocker for ten weeks after it was answered — and the D46 pause banner then described it as "deferred", implying still-outstanding. Both are corrected. **On un-pause, this question is answered; do not re-run the sprint.**
 - **2026-05-20** — **ArticleDetailScreen + NavHost + Custom Tabs.** First navigable surface beyond the feed. `SiftNavHost` introduces routes `feed` and `article/{articleId}`. `ArticleStore` (new `@Singleton` in `data/repository/`) is the in-memory bridge between fetch (populated by `ArticleRepository.feed`) and detail (read by `ArticleDetailViewModel`); swap to Room at week 6 without touching call sites. Process-death fallback: in-memory store returns `null` after kill → detail VM emits `Missing` state with explanatory copy + back button (SavedStateHandle restoration is a v1.1 polish item). Custom Tabs over `Intent.ACTION_VIEW` so source links keep the Sift palette on the toolbar — `NewsprintPaper` light / `LateEditionBg` dark. Civic-literacy chrome (primer + entity chips) deferred to the next PR pending the design sprint. `accentColor()` extracted from `ArticleCard`'s private helper to `ui/theme/CategoryAccent.kt` so detail screen + future chips can share it.
 - **2026-05-20** — **Category tabs + HorizontalPager.** `FeedViewModel` reshaped from one-category-at-a-time to `Map<CategoryId, FeedUiState>` so already-loaded pages render instantly on revisit. `FeedScreen` becomes stateless (parent passes the relevant state + callbacks); `FeedHostScreen` owns the pager + tabs + ViewModel. Loading strategy: eager-load `TOP` on init, others on first selection via `LaunchedEffect(currentPage)`. Error states require explicit Retry (don't auto-refetch on revisit) so a transient failure can be inspected.
 - **2026-05-20** — **Two post-merge build fixes on top of PR #2 (feed wired).** Pulled main, build broke; both root-caused and landed direct-to-main:

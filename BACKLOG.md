@@ -8,6 +8,7 @@ Items not committed to a current milestone. Promote to GitHub issues when work i
 
 Captured per [`sift/docs/ANDROID_APP_v1.md`](https://github.com/kristenmartino/sift/blob/main/docs/ANDROID_APP_v1.md) §Backlog for v1.1+. Reproduced here so the local backlog stays the single source for in-repo decisions.
 
+- **Dossier + compare deep links from the web's share loop** *(2026-08-10, noted during the web human-touch pass — for un-pause, not before)* — the web now has Share/Cite on every dossier and URL-addressable compare results (`?compare=<topic>&sources=…`). When the pause ends: handle `https://siftnews…/politician/*` (etc.) App Links so shared dossier URLs open in-app, and register the compare URL shape. Complements the existing App Links block in AndroidManifest, which currently has no in-app handler behind it.
 - **Glance home-screen widget** ("Today on Sift") — small + medium sizes. Deferred from v1 to keep scope honest; revisit at v1.1 once reader engagement signal exists.
 - **Native multi-source compare UI** — port from sift-mcp behavior. Today: link to web `/compare` in Custom Tabs.
 - **Native civic dossier views** (politicians, orgs, bills, outlets) — today they open in Custom Tabs. Native pages give us deep-link smoothness + offline.

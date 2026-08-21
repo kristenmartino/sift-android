@@ -6,8 +6,8 @@ Orientation for Claude Code sessions. Keep this short and current — if it grow
 
 Before doing real work in a session:
 
-1. Read [`STATUS.md`](./STATUS.md) — Active focus, Open question, Next 3, Blocked-on, Recent decisions. *(SessionStart hook auto-loads it; no manual `cat` needed when the hook fires.)*
-2. List open PRs + issues (`gh pr list`, `gh issue list`, or `mcp__github__list_pull_requests` / `list_issues`).
+1. Read [`STATUS.md`](./STATUS.md) — Active focus, Open question, Recent decisions. *(SessionStart hook auto-loads it; no manual `cat` needed when the hook fires.)* STATUS.md holds no current state beyond that — the engineering queue (Next 3 / Blocked-on equivalent) lives in GitHub.
+2. List open PRs + issues (`gh pr list --state open`, `gh issue list --state open`, or `mcp__github__list_pull_requests` / `list_issues`).
 3. Read [`sift/docs/ANDROID_APP_v1.md`](https://github.com/kristenmartino/sift/blob/main/docs/ANDROID_APP_v1.md) for canonical decisions if the work touches scope / tier choices.
 
 If `STATUS.md` is older than ~3 days during active development, flag the staleness to the user before starting.
@@ -16,7 +16,8 @@ If `STATUS.md` is older than ~3 days during active development, flag the stalene
 
 Before opening the PR:
 
-- Did this change anything in `STATUS.md`'s Next 3, Blocked-on, or Open question? Update it.
+- Did this close or add engineering work? File/close a GitHub issue (`gh issue list --state open` is the queue — STATUS.md no longer tracks it).
+- Did this change anything in `STATUS.md`'s Open question? Update it.
 - Did this make or close a strategic decision? Add a `## Recent decisions` entry in `STATUS.md` and (if substantial) a row in [`sift/docs/DECISIONS.md`](https://github.com/kristenmartino/sift/blob/main/docs/DECISIONS.md) — the cross-product ADR log.
 - Did this change a public contract (API call, deep link, data model)? Update [`README.md`](./README.md) + verify `data/api/` matches `sift/lib/types.ts`.
 - Did this change how the app boots / runs locally? Update the Quick Start in `README.md`.
